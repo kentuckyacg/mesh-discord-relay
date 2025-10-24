@@ -1,6 +1,6 @@
 /target
-config.toml
-.env
 Cargo.lock
-.idea
+config.toml
 database.db
+.env
+.idea

@@ -1,7 +1,5 @@
 # Meshtastic Discord Relay
 
----
-
 
 
 ### Todos

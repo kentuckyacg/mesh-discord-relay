@@ -9,13 +9,19 @@ use meshtastic::protobufs::mesh_packet::PayloadVariant;
 use meshtastic::protobufs::{Data, MeshPacket, ServiceEnvelope};
 use paho_mqtt::{Message as mqttMessage, MQTT_VERSION_5};
 use sqlx::{Pool, Sqlite};
+use std::sync::Mutex;
 use tracing::{debug, error, info, warn};
 use crate::database;
 
-type Aes128Ctr64LE = ctr::Ctr64LE<aes::Aes128>;
-type Aes256Ctr64LE = ctr::Ctr64LE<aes::Aes256>;
+type Aes128Ctr32LE = ctr::Ctr32LE<aes::Aes128>;
+type Aes256Ctr32LE = ctr::Ctr32LE<aes::Aes256>;
 
+struct Msg {
+    nodeid: u32,
+    message: String,
+}
 
+static LAST_MSG: Mutex<Msg> = Mutex::new(Msg { nodeid: 0, message: String::new() });
 
 pub async fn connect(db_pool: &Pool<Sqlite>, server_uri: String, username: String, password: String, topics: Vec<(String, String)>, qos: i32, webhook_url: String) {
     debug!("Creating initial client opts for server {}", server_uri);
@@ -121,6 +127,16 @@ pub async fn on_message(db_pool: &Pool<Sqlite>, msg: mqttMessage, topics: &Vec<(
                         format!("{}", packet.from)
                     }
                 };
+
+
+                let mut last_msg = LAST_MSG.lock().unwrap();
+                if last_msg.nodeid == packet.from && last_msg.message == text {
+                    return;
+                }
+
+                last_msg.nodeid = packet.from;
+                last_msg.message = text.clone();
+
                 let full_discord_msg = format!("[{}] | {}: {}", parent_topic, name, text);
                 crate::discord::send_message(webhook_url.clone(), full_discord_msg).await;
             },
@@ -180,12 +196,12 @@ pub fn decrypt_message(payload: &[u8], key: String) -> Result<(MeshPacket, Data)
 
                     let mut msg = vec![0u8; data.len()];
                     if key_bytes.len() == 16 {
-                        let mut cipher = Aes128Ctr64LE::new(key_bytes.as_slice().into(), nonce_bytes.as_slice().into());
+                        let mut cipher = Aes128Ctr32LE::new(key_bytes.as_slice().into(), nonce_bytes.as_slice().into());
                         if let Err(e) = cipher.apply_keystream_b2b(&data, &mut msg) {
                             return Err(format!("Failed to encrypt message: {}", e));
                         };
                     } else if key_bytes.len() == 32 {
-                        let mut cipher = Aes256Ctr64LE::new(key_bytes.as_slice().into(), nonce_bytes.as_slice().into());
+                        let mut cipher = Aes256Ctr32LE::new(key_bytes.as_slice().into(), nonce_bytes.as_slice().into());
                         if let Err(e) = cipher.apply_keystream_b2b(&data, &mut msg) {
                             return Err(format!("Failed to encrypt message: {}", e));
                         }
