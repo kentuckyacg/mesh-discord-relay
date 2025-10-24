@@ -21,7 +21,7 @@ pub async fn init(db_url: String) -> Result<Pool<Sqlite>, String> {
     let res = query_as!(
         NodeInfo,
         "create table if not exists node_info (
-            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            idx INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             name text not null,
             nodeid INTEGER not null
         )",
