@@ -1,0 +1,39 @@
+# Base configurations
+[base]
+# Discord webhook url
+webhook = "<discord webhook>"
+database = "sqlite://database.db"
+
+# A single MQTT connection configuration
+[mqtt]
+# Full uri of the MQTT server
+# Ex: tcp://mqtt.meshtastic.org:1883
+uri = "<full mqtt server uri>"
+# Username to use
+# Ex: meshdev
+username = "<mqtt username>"
+# Password
+# Ex: large4cats
+password = "<mqtt password>"
+
+# The channels/topics you want to subscribe to.
+[[mqtt.channels]]
+# Ex: "msh/US/2/e/LongFast/#"
+topic = "<topic>"
+# Ex: "AQ=="
+key = "<channel key>"
+
+# You can add multiple channels by copying the channel config and changing the values
+#[[mqtt.channels]]
+#topic = "<topic>"
+#key = "<channel key>"
+
+# If you want to add multiple mqtt servers, just copy the config above, and increment the number
+#[[mqtt]]
+#uri = "<full mqtt server uri>"
+#username = "<mqtt username>"
+#password = "<mqtt password>"
+#
+#[[mqtt.channels]]
+#topic = "<topic>"
+#key = "<channel key>"

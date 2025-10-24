@@ -1,0 +1,33 @@
+[package]
+name = "mesh-discord-relay"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+futures = "0.3.31"
+paho-mqtt = "0.13.3"
+toml = "0.9.8"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
+async-std = "1.13.2"
+tokio = { version = "1.47.1", features = ["rt", "rt-multi-thread", "macros"] }
+meshtastic = "0.1.7"
+base64 = "0.22.1"
+sqlx = { version = "0.8.6", features = ["sqlite", "runtime-tokio"] }
+openssl-sys = { version = "0.9.110", features = ["vendored"] }
+clap = { version = "4.5.50", features = ["derive"] }
+serde = { version = "1.0.228", features = ["derive"] }
+reqwest = { version = "0.12.24", features = ["json", "rustls-tls"] }
+serde_json = "1.0.145"
+aes = "0.8.4"
+ctr = "0.9.2"
+
+[profile.release]
+lto = true
+panic = 'abort'
+overflow-checks = false
+debug-assertions = false
+incremental = false
+rpath = false
+codegen-units = 1
+strip = true
